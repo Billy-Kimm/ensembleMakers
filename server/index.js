@@ -8,6 +8,7 @@ const session = require('express-session');
 const flash = require('connect-flash');
 require('dotenv').config();
 const passportConfig = require('./services');
+const autoIncrement = require('mongoose-auto-increment');
 
 const express = require('express');
 const app = express();
@@ -22,6 +23,9 @@ mongoose
   )
   .then(() => console.log("Connected to MongoDB"))
   .catch(error => console.error(error.message));
+
+// autoIncrement 초기화
+autoIncrement.initialize(mongoose.connection);
 
 /**  
  * Routes
@@ -47,21 +51,22 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/img', express.static(path.join(__dirname, 'uploads')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(session({
-  resave: false,
-  saveUninitialized: true,
-  secret: process.env.COOKIE_SECRET,
-  cookie: {
-    httpOnly: true,
-    secure: false,
-    maxAge: (60 * 60 * 1000)
-  },
-}));
-app.use(flash());
-app.use(passport.initialize());
-app.use(passport.session());
-app.use('/auth', authRouter);
-app.use('/api/users', usersRouter);
+// 로그인 세션
+// app.use(session({
+//   resave: false,
+//   saveUninitialized: true,
+//   secret: process.env.COOKIE_SECRET,
+//   cookie: {
+//     httpOnly: true,
+//     secure: false,
+//     maxAge: (60 * 60 * 1000)
+//   },
+// }));
+// app.use(flash());
+// app.use(passport.initialize());
+// app.use(passport.session());
+// app.use('/auth', authRouter);
+// app.use('/api/users', usersRouter);
 app.use('/api/portions', portionsRouter);
 app.use('/api/posts', postsRouter);
 app.use('/api/reviews', reviewsRouter);

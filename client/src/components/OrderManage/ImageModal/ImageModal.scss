@@ -1,0 +1,205 @@
+.image-modal-wrapper {
+  margin: 1rem;
+  overflow: auto;
+}
+
+.file-box {
+  position: relative;
+  left: 50%; 
+  margin-left: -35px;
+}
+.file-button {
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  border-radius: 50px;
+  background-color: #fa6e57;
+  color: #FFFFFF;
+  border-style: solid;
+  font-size: 30px;
+  text-align: center;
+}
+.file-button-hidden {
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  border-radius: 50px;
+  opacity: 0;
+  cursor: pointer;
+
+  filter: alpha(opacity=0);
+  -ms-filter: "alpha(opacity=0)";
+  -khtml-opacity: 0;
+  -moz-opacity: 0;
+}
+
+.preview-ref-text {
+  width: 100%;
+  text-align: center;
+  margin-top: 5rem;
+  color: #cccccc;
+  // 글자드래그 방지
+  -ms-user-select: none; -moz-user-select: -moz-none; -webkit-user-select: none; -khtml-user-select: none; user-select:none;
+}
+.list-ref-text {
+  font-size: 1.5rem;
+  width: 100%;
+  text-align: center;
+  margin-top: 1.5rem;
+  color: #bcbaba;
+  // 글자드래그 방지
+  -ms-user-select: none; -moz-user-select: -moz-none; -webkit-user-select: none; -khtml-user-select: none; user-select:none;
+}
+
+.image-list-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  margin: auto;
+  margin-top: 1.5rem;
+  padding: 10px;
+  width: 95%;
+  height: 12rem;
+  border: 1px solid #bcbaba;
+  overflow-x: auto;
+  align-items: center;
+  // 글자드래그 방지
+  -ms-user-select: none; -moz-user-select: -moz-none; -webkit-user-select: none; -khtml-user-select: none; user-select:none;
+}
+// 스크롤바 숨기기
+.image-list-wrapper::-webkit-scrollbar { 
+  display: none; 
+}
+
+.image-list-item {
+  width: 10rem;
+  height: 9rem;
+  margin: 0.5rem;
+  margin-top: -0.5rem;
+}
+.image-list-item img{
+  float: left;
+  width: 150px;
+  height: 154px;
+  margin-right: 10rem;
+}
+
+.image-preview-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  margin: auto;
+  margin-top: 1.5rem;
+  padding: 10px;
+  width: 95%;
+  height: 12rem;
+  border: 1px solid #bcbaba;
+  overflow-x: auto;
+  align-items: center;
+  // 글자드래그 방지
+  -ms-user-select: none; -moz-user-select: -moz-none; -webkit-user-select: none; -khtml-user-select: none; user-select:none;
+}
+// 스크롤바 숨기기
+.image-preview-wrapper::-webkit-scrollbar { 
+  display: none; 
+}
+
+.image-preview-item {
+  width: 10rem;
+  height: 9rem;
+  margin: 0.5rem;
+  margin-top: -0.5rem;
+}
+.image-preview-item img{
+  float: left;
+  width: 150px;
+  height: 154px;
+  margin-right: 10rem;
+}
+
+.image-resize{
+  width: 100px;
+  height: 160px;
+  display: block;
+}
+
+.image-remove-button {
+  position: absolute;
+  clear: both;
+  width: 25px;
+  height: 25px;
+  border-radius: 50px;
+  background-color: #ff5a5f;
+  color: white;
+  text-align: center;
+  padding-top: 0.3rem;
+  cursor: pointer;
+  &:hover {
+    background-color: red;
+  }
+}
+
+.right-button {
+  position: absolute;
+  z-index: 10;
+  float: left;
+  right: 0.5rem;
+  padding-top: 0.85rem;
+  width: 50px;
+  height: 50px;
+  border-radius: 50px;
+  background-color: #d0ebff;
+  color: white;
+  text-align: center;
+  font-size: 1.5rem;
+  margin-top: -7.5rem;
+  cursor: pointer;
+  &:hover{
+    background-color: #4dabf7;
+  }
+}
+.left-button {
+  position: absolute;
+  float: left;
+  left: 0.5rem;
+  padding-top: 0.85rem;
+  width: 50px;
+  height: 50px;
+  border-radius: 50px;
+  background-color: #d0ebff;
+  color: white;
+  text-align: center;
+  font-size: 1.5rem;
+  margin-top: -7.5rem;
+  cursor: pointer;
+  &:hover{
+    background-color: #4dabf7;
+  }
+}
+
+.image-modal-post-button {
+  border: 2px solid #fa6e57;
+  color: #fa6e57;
+  margin: auto;
+  margin-top: 1.5rem;
+  margin-bottom: 2rem;
+  padding-top: 0.6rem;
+  width: 15%;
+  height: 40px;
+  text-align: center;
+  cursor: pointer;
+  &:hover {
+    background-color: #fa6e57;
+    color: white;
+  }
+  // 글자드래그 방지
+  -ms-user-select: none; -moz-user-select: -moz-none; -webkit-user-select: none; -khtml-user-select: none; user-select:none;
+}
+
+
+.image-modal-line {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  width: 100%;
+  border: 0.04rem solid #d8d6d6;
+}

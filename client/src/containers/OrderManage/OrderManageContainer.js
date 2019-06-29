@@ -5,114 +5,156 @@ import { OrderManageWrapper } from '../../components/OrderManage/OrderManageWrap
 import { OrderManageState } from '../../components/OrderManage/OrderManageState';
 import { OrderManageList } from '../../components/OrderManage/OrderManageList';
 import { OrderManageDetail } from '../../components/OrderManage/OrderManageDetail';
-import { DetailPostButton } from '../../components/OrderManage/DetailPostButton';
 import { DetailInput } from '../../components/OrderManage/DetailInput';
 import * as orderActions from '../../store/modules/order';
 import * as customerActions from '../../store/modules/customer';
-import { accessSync } from 'fs';
+import * as modalActions from '../../store/modules/modal';
+import * as reviewActions from '../../store/modules/review';
+import { formatDate } from '../../lib/dateFunction';
 
 class OrderManageContainer extends Component {
   
   componentDidMount() {
-    // OrderManageList에 customerInfo 불러오기
     const { CustomerActions } = this.props;
+    // OrderManageList에 customerInfo 불러오기
     CustomerActions.getAllCustomerInfo();
   }
 
-  handleChange = (e) => {
+  handleViewChange = (view) => {
     const { OrderActions } = this.props;
-    const { name, value } = e.target;
+    OrderActions.viewChange(view);
+  }
 
-    OrderActions.changeInput({
-      name,
-      value
-    });
+  handleImgTextViewChange = (view) => {
+    const { OrderActions } = this.props;
+    OrderActions.imgTextViewChange(view);
   }
 
   handleGetById = async(id) => {
     const { allCustomers, customerById, postForm } = this.props;
-    const { CustomerActions, OrderActions } = this.props;
+    const { CustomerActions, OrderActions, ReviewActions } = this.props;
 
     const customerInfo = allCustomers.find(customer => customer._id === id );
 
     try {
-      await CustomerActions.getCustomerInfoById(customerInfo._id)
-      await OrderActions.getOrderById(customerInfo._id)
+      await CustomerActions.getCustomerInfoById(customerInfo._id);
+      await OrderActions.getOrderById(customerInfo._id);
+      await ReviewActions.getReviewByCustomerId(customerInfo._id);
+      // order detail 창 보이기
+      await OrderActions.detailViewChange(true)
     }catch(e) {
       console.log(e);
     }
   };
 
-  handleChangeState = async() => {
-    const { CustomerActions } = this.props;
+  handleChangeState = async(state) => {
+    const { CustomerActions, OrderActions } = this.props;
     const { customerById } = this.props;
     const id = customerById.toJS()._id;
-    const state = "processing";
 
     try {
       await CustomerActions.changeState({id, state})
-      //성공하면 재렌더링이 필요할듯하다..
+      // order detail view 초기화
+      await OrderActions.detailViewChange(false);
+      // orderById state 초기화
+      await OrderActions.orderInit();
     }catch(e) {
       console.log(e);
     }
   }
 
-  // handlePostOrder = async() => {
-  //   const { OrderActions } = this.props;
-  //   const customerId = this.props.customerById.toJS()._id;
-  //   const { postForm } = this.props;
-  //   const { size } = postForm.toJS();
+  handleOpenEditorModal = () => {
+    const { orderById } = this.props;
+    const { ModalActions } = this.props;
 
-  //   try {
-  //   await OrderActions.postOrder({customerId, size});
-  //   }catch(e) {
-  //     console.log(e);
-  //   }
-  // }
+    ModalActions.show({
+      visible: "editor",
+      modalContents: orderById.toJS()
+    })
+  }
+
+  handleOpenImageModal = () => {
+    const { ModalActions } = this.props;
+    ModalActions.show({
+      visible: "image"
+    })
+  }
+
+  handlePatchProcessingNext = async(id, processing) => {
+    const { OrderActions } = this.props;
+    OrderActions.patchProcessing({
+      id: id, 
+      processing: processing});
+    OrderActions.changeProcessingState({
+      id: id,
+      processingState: 'next'
+    });
+  }
+
+  handlePatchProcessingPre = async(id, processing) => {
+    const { OrderActions } = this.props;
+    OrderActions.deleteProcessing({
+      id: id, 
+      processing: processing});
+    OrderActions.changeProcessingState({
+      id: id,
+      processingState: 'pre'
+    });
+  }
 
   render() {
-    const { allCustomers, customerById, orderById } = this.props;
-    const { handleGetById, handleChange, handlePostOrder, handleChangeState } = this;
-    // 변수이름 size라고 하면 오류
-    const { sizeValue } = this.props.postForm;
-
-    //customer전체명단 불러오기
-    const allCustomerList = allCustomers
-      .map(
-        (allCustomer, i) => <div
-        key={i}
-        id={allCustomer._id}
-        name={allCustomer.name}
-        phone={allCustomer.phone}
-        address={allCustomer.address}
-        onClick={() => handleGetById(allCustomer._id)}
-        >{allCustomer.name}<br/>{allCustomer.state}</div>
-      )
+    const { view, detailView, imgTextView, allCustomers, customerById, orderById, review } = this.props;
+    const { handleViewChange, handleImgTextViewChange, handleGetById, handlePostOrder, handleChangeState, handleOpenEditorModal, handleOpenImageModal, handlePatchProcessingNext, handlePatchProcessingPre } = this;
 
     return(
       <OrderManageWrapper>
-        <OrderManageState/>
-        <OrderManageList>{allCustomerList}</OrderManageList>
-        <OrderManageDetail>
-          {customerById.get('name')}<br/>
-          {customerById.get('_id')}<br/>
-          {customerById.get('phone')}<br/>
-          {customerById.get('address')}<br/>
-          {customerById.get('state')}<br/>
-          <div>-------------------------------</div>
-          {orderById.get('_id')}
-          {/* <DetailInput
-            label="size" 
-            name="size"
-            placeholder="사이즈"
-            value={sizeValue}
-            onChange={handleChange}
-          /> */}
-          <DetailPostButton
-            onClick={handlePostOrder}
-          >저장하기</DetailPostButton>
-          <div onClick={handleChangeState}>상태바꾸기</div>
-        </OrderManageDetail>
+        <OrderManageState
+          state={view}
+          onClick={handleViewChange}
+        />
+        <OrderManageList
+          allCustomers={allCustomers}
+          view={view}
+          customerById={customerById.toJS()._id}
+          onClick={handleGetById}
+        />
+        <OrderManageDetail
+          id={orderById.get('_id')}
+          orderNumber={orderById.get('orderNumber')}
+          name={orderById.getIn(['customerId', 'name'])}
+          date={formatDate(orderById.getIn(['customerId', 'createdAt']))}
+          phone={orderById.getIn(['customerId', 'phone'])}
+          address={orderById.getIn(['customerId', 'address'])}
+          state={orderById.getIn(['customerId', 'state'])}
+          model={orderById.toJS().model}
+          rightSize={orderById.toJS().rightSize}
+          leftSize={orderById.toJS().leftSize}
+          last={orderById.toJS().last}
+          sole={orderById.toJS().sole}
+          midsole={orderById.toJS().midsole}
+          sockLining={orderById.toJS().sockLining}
+          heel={orderById.toJS().heel}
+          decoration={orderById.toJS().decoration}
+          material={orderById.toJS().material}
+          innerMaterial={orderById.toJS().innerMaterial}
+          color={orderById.toJS().color}
+          detail={orderById.toJS().detail}
+          images={orderById.toJS().images}
+          imgTextView={imgTextView}
+          detailView={detailView}
+          lastComplete={orderById.toJS().lastComplete && formatDate(orderById.toJS().lastComplete)}
+          cutComplete={orderById.toJS().cutComplete && formatDate(orderById.toJS().cutComplete)}
+          upperComplete={orderById.toJS().upperComplete && formatDate(orderById.toJS().upperComplete)}
+          soleComplete={orderById.toJS().soleComplete && formatDate(orderById.toJS().soleComplete)}
+          processingState={orderById.toJS().processingState}
+          review={review.toJS()}
+          onChangeState={handleChangeState}
+          onChangeImgText={handleImgTextViewChange}
+          onOpenEditorModal={handleOpenEditorModal}
+          onOpenImageModal={handleOpenImageModal}
+          onPatchProcessingNext={handlePatchProcessingNext}
+          onPatchProcessingPre={handlePatchProcessingPre}
+        />
       </OrderManageWrapper>
     )
   }
@@ -120,14 +162,19 @@ class OrderManageContainer extends Component {
 
 export default connect(
   (state) => ({
+    view: state.order.get('view'),
+    detailView: state.order.get('detailView'),
+    imgTextView: state.order.get('imgTextView'),
+    allCustomers: state.customer.get('allCustomers'),
+    customerById: state.customer.get('customerById'),
     allOrders: state.order.get('allOrders'),
     orderById: state.order.get('orderById'),
-    postForm: state.order.get('postForm'),
-    allCustomers: state.customer.get('allCustomers'),
-    customerById: state.customer.get('customerById')
+    review: state.review.get('data'),
   }),
   (dispatch) => ({
     OrderActions: bindActionCreators(orderActions, dispatch),
-    CustomerActions: bindActionCreators(customerActions, dispatch)
+    CustomerActions: bindActionCreators(customerActions, dispatch),
+    ModalActions: bindActionCreators(modalActions, dispatch),
+    ReviewActions: bindActionCreators(reviewActions, dispatch),
   })
 )(OrderManageContainer);
